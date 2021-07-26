@@ -17,10 +17,13 @@ import com.chuckerteam.chucker.databinding.ChuckerFragmentThrowableListBinding
 import com.chuckerteam.chucker.internal.data.model.DialogData
 import com.chuckerteam.chucker.internal.support.showDialog
 import com.chuckerteam.chucker.internal.ui.MainViewModel
+import com.chuckerteam.chucker.internal.ui.MainViewModelFactory
 
 internal class ThrowableListFragment : Fragment(), ThrowableAdapter.ThrowableClickListListener {
 
-    private val viewModel: MainViewModel by viewModels()
+    private val viewModel: MainViewModel by viewModels {
+        MainViewModelFactory()
+    }
 
     private lateinit var errorsBinding: ChuckerFragmentThrowableListBinding
     private lateinit var errorsAdapter: ThrowableAdapter

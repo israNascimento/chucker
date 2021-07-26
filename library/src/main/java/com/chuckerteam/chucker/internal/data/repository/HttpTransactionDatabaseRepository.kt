@@ -1,6 +1,7 @@
 package com.chuckerteam.chucker.internal.data.repository
 
 import androidx.lifecycle.LiveData
+import androidx.sqlite.db.SimpleSQLiteQuery
 import com.chuckerteam.chucker.internal.data.entity.HttpTransaction
 import com.chuckerteam.chucker.internal.data.entity.HttpTransactionTuple
 import com.chuckerteam.chucker.internal.data.room.ChuckerDatabase
@@ -10,9 +11,41 @@ internal class HttpTransactionDatabaseRepository(private val database: ChuckerDa
 
     private val transactionDao get() = database.transactionDao()
 
-    override fun getFilteredTransactionTuples(code: String, path: String): LiveData<List<HttpTransactionTuple>> {
+    override fun getFilteredTransactionTuples(
+        path: String,
+        code: String,
+        urls: List<String>
+    ): LiveData<List<HttpTransactionTuple>> {
+        val query = getFilteredTransactionQuery(path, code, urls)
+        return transactionDao.getFilteredTuples(query)
+    }
+
+    @Suppress("SpreadOperator")
+    private fun getFilteredTransactionQuery(
+        path: String,
+        code: String,
+        urls: List<String>
+    ): SimpleSQLiteQuery {
+        val codeQuery = "$code%"
         val pathQuery = if (path.isNotEmpty()) "%$path%" else "%"
-        return transactionDao.getFilteredTuples("$code%", pathQuery)
+        val urlsQuery = if (urls.isEmpty()) listOf("%") else urls
+
+        val builder = StringBuilder(
+            "SELECT id, requestDate, tookMs, protocol, method, host, " +
+                "path, scheme, responseCode, requestPayloadSize, responsePayloadSize, error FROM " +
+                "transactions WHERE responseCode LIKE (?) AND path LIKE (?) AND ("
+        )
+        urlsQuery.forEachIndexed { index, _ ->
+            builder.append(" url LIKE (?) ")
+            if (index != urlsQuery.count() - 1) {
+                builder.append("OR")
+            }
+        }
+        builder.append(") ORDER BY requestDate DESC")
+        return SimpleSQLiteQuery(
+            builder.toString(),
+            arrayOf(codeQuery, pathQuery, *urlsQuery.toTypedArray())
+        )
     }
 
     override fun getTransaction(transactionId: Long): LiveData<HttpTransaction?> {

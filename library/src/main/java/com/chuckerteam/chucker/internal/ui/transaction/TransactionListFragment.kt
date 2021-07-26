@@ -11,7 +11,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -22,6 +22,8 @@ import com.chuckerteam.chucker.internal.support.TransactionListDetailsSharable
 import com.chuckerteam.chucker.internal.support.shareAsFile
 import com.chuckerteam.chucker.internal.support.showDialog
 import com.chuckerteam.chucker.internal.ui.MainViewModel
+import com.chuckerteam.chucker.internal.ui.MainViewModelFactory
+import com.chuckerteam.chucker.internal.ui.group.FilterByGroupDialog
 import kotlinx.coroutines.launch
 
 internal class TransactionListFragment :
@@ -29,7 +31,9 @@ internal class TransactionListFragment :
     SearchView.OnQueryTextListener,
     TransactionAdapter.TransactionClickListListener {
 
-    private val viewModel: MainViewModel by viewModels()
+    private val viewModel: MainViewModel by activityViewModels {
+        MainViewModelFactory()
+    }
 
     private lateinit var transactionsBinding: ChuckerFragmentTransactionListBinding
     private lateinit var transactionsAdapter: TransactionAdapter
@@ -96,6 +100,10 @@ internal class TransactionListFragment :
                 )
                 true
             }
+            R.id.filter_by_group -> {
+                showFilterByGroupDialog()
+                true
+            }
             R.id.export -> {
                 requireContext().showDialog(
                     getExportDialogData(),
@@ -110,6 +118,10 @@ internal class TransactionListFragment :
                 super.onOptionsItemSelected(item)
             }
         }
+    }
+
+    private fun showFilterByGroupDialog() {
+        FilterByGroupDialog.newInstance().show(childFragmentManager, null)
     }
 
     override fun onQueryTextSubmit(query: String): Boolean = true

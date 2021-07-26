@@ -4,6 +4,7 @@ import android.content.Context
 import com.chuckerteam.chucker.internal.data.entity.HttpTransaction
 import com.chuckerteam.chucker.internal.data.entity.RecordedThrowable
 import com.chuckerteam.chucker.internal.data.repository.RepositoryProvider
+import com.chuckerteam.chucker.internal.support.GroupSingleton
 import com.chuckerteam.chucker.internal.support.NotificationHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,13 +24,15 @@ import kotlinx.coroutines.launch
 public class ChuckerCollector @JvmOverloads constructor(
     context: Context,
     public var showNotification: Boolean = true,
-    retentionPeriod: RetentionManager.Period = RetentionManager.Period.ONE_WEEK
+    retentionPeriod: RetentionManager.Period = RetentionManager.Period.ONE_WEEK,
+    groups: List<Group> = listOf()
 ) {
     private val retentionManager: RetentionManager = RetentionManager(context, retentionPeriod)
     private val notificationHelper: NotificationHelper = NotificationHelper(context)
 
     init {
         RepositoryProvider.initialize(context)
+        GroupSingleton.groups = groups.toMutableList()
     }
 
     /**

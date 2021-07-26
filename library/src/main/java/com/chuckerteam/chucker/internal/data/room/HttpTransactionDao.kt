@@ -5,7 +5,9 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.Update
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.chuckerteam.chucker.internal.data.entity.HttpTransaction
 import com.chuckerteam.chucker.internal.data.entity.HttpTransactionTuple
 
@@ -19,13 +21,10 @@ internal interface HttpTransactionDao {
     )
     fun getSortedTuples(): LiveData<List<HttpTransactionTuple>>
 
-    @Query(
-        "SELECT id, requestDate, tookMs, protocol, method, host, " +
-            "path, scheme, responseCode, requestPayloadSize, responsePayloadSize, error FROM " +
-            "transactions WHERE responseCode LIKE :codeQuery AND path LIKE :pathQuery " +
-            "ORDER BY requestDate DESC"
-    )
-    fun getFilteredTuples(codeQuery: String, pathQuery: String): LiveData<List<HttpTransactionTuple>>
+    @RawQuery(observedEntities = [HttpTransaction::class])
+    fun getFilteredTuples(
+        query: SupportSQLiteQuery
+    ): LiveData<List<HttpTransactionTuple>>
 
     @Insert
     suspend fun insert(transaction: HttpTransaction): Long?

@@ -4,6 +4,7 @@ import android.content.Context
 import com.chuckerteam.chucker.api.Chucker
 import com.chuckerteam.chucker.api.ChuckerCollector
 import com.chuckerteam.chucker.api.ChuckerInterceptor
+import com.chuckerteam.chucker.api.Group
 import com.chuckerteam.chucker.api.RetentionManager
 import com.chuckerteam.chucker.sample.HttpBinApi.Data
 import okhttp3.MediaType
@@ -28,7 +29,9 @@ class HttpBinClient(
     private val collector = ChuckerCollector(
         context = context,
         showNotification = true,
-        retentionPeriod = RetentionManager.Period.ONE_HOUR
+        retentionPeriod = RetentionManager.Period.ONE_HOUR,
+        groups = listOf(Group("Delay", listOf("%delay%")), Group("Cookies", listOf("%cookies%")))
+
     )
 
     private val chuckerInterceptor = ChuckerInterceptor(
